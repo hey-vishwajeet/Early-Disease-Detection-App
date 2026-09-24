@@ -1,39 +1,19 @@
 name: disease_risk_app
-description: Interpretable ML for Personalized Disease Risk Stratification
-
+description: A practical student prototype for hybrid quantum heart-disease classification
 publish_to: "none"
-
-version: 1.0.0+1
-
+version: 2.0.0+2
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-
+  sdk: ">=3.10.0 <4.0.0"
 dependencies:
   flutter:
     sdk: flutter
-
-  # HTTP requests for API calls
   http: ^1.2.1
-
-  # State management
-  provider: ^6.1.2
-
-  # Chart visualization for feature importance
-  fl_chart: ^0.68.0
-
-  # Icons
-  cupertino_icons: ^1.0.6
-  
-  # Local Storage
-  shared_preferences: ^2.2.3
+  file_selector: ^1.1.0
   pdf: ^3.12.0
   printing: ^5.14.3
-  google_fonts: ^8.0.2
-
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
-
 flutter:
   uses-material-design: true

@@ -1,232 +1,142 @@
-// lib/services/report_generator.dart
-
 import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import '../models/patient_input.dart';
 import '../models/prediction_result.dart';
 
 class ReportGenerator {
-  static Future<void> generateAndPreviewPdf(PatientInput input, PredictionResult result, List<String> recommendations) async {
-    final pdf = pw.Document();
-
-    pdf.addPage(
+  static Future<Uint8List> buildPdf(PredictionResult result) async {
+    final data = result.data;
+    final dataset = data['dataset'] as Map<String, dynamic>;
+    final source = dataset['source'] as Map<String, dynamic>;
+    final document = pw.Document(
+      title: 'Heart disease benchmark assessment',
+      author: 'Hybrid QML Student Prototype',
+    );
+    document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        build: (pw.Context context) {
-          return [
-            _buildHeader(),
-            pw.SizedBox(height: 20),
-            _buildPatientInfo(input),
-            pw.SizedBox(height: 20),
-            _buildRiskScore(result),
-            pw.SizedBox(height: 20),
-            _buildContributingFactors(result),
-            pw.SizedBox(height: 20),
-            _buildRecommendations(recommendations),
-            pw.SizedBox(height: 30),
-            _buildFooter(),
-          ];
-        },
-      ),
-    );
-
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => pdf.save(),
-      name: 'Disease_Risk_Assessment_Report.pdf',
-    );
-  }
-
-  static pw.Widget _buildHeader() {
-    return pw.Container(
-      padding: const pw.EdgeInsets.only(bottom: 20),
-      decoration: const pw.BoxDecoration(
-        border: pw.Border(bottom: pw.BorderSide(color: PdfColors.blue900, width: 2)),
-      ),
-      child: pw.Row(
-        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-        children: [
-          pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                'Personalized Health Assessment',
-                style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: PdfColors.blue900),
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text('Disease Risk Stratification Report', style: const pw.TextStyle(fontSize: 14, color: PdfColors.grey700)),
-            ],
+        margin: const pw.EdgeInsets.all(36),
+        theme: pw.ThemeData.withFont(
+          base: pw.Font.helvetica(),
+          bold: pw.Font.helveticaBold(),
+        ),
+        build: (_) => [
+          pw.Text(
+            'Hybrid Quantum Machine Learning Platform\nfor Early Disease Detection',
+            style: pw.TextStyle(
+              fontSize: 18,
+              fontWeight: pw.FontWeight.bold,
+              color: PdfColors.blue800,
+            ),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text('Heart disease | Student research prototype'),
+          pw.Divider(),
+          pw.Text(
+            result.prediction,
+            style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(result.summary),
+          pw.SizedBox(height: 12),
+          pw.Text(
+            'Quantum model score: ${result.score.toStringAsFixed(4)}; decision boundary: ${result.threshold.toStringAsFixed(4)}.',
           ),
           pw.Text(
-            'Date: ${DateTime.now().toString().split(' ')[0]}',
-            style: const pw.TextStyle(fontSize: 12),
+            'Uncalibrated decision margin. Not a disease probability or future risk.',
+          ),
+          pw.Header(level: 1, text: 'Recorded measurements'),
+          pw.TableHelper.fromTextArray(
+            headers: ['Measurement', 'Value', 'Unit'],
+            data: (data['features'] as List)
+                .map(
+                  (f) => [
+                    f['label'],
+                    data['input'][f['name']]?.toString() ??
+                        'Missing (training median used)',
+                    f['unit'],
+                  ],
+                )
+                .toList(),
+            cellStyle: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.Header(level: 1, text: 'Three main model influences'),
+          ...result.topFeatures.map(
+            (f) => pw.Padding(
+              padding: const pw.EdgeInsets.only(bottom: 6),
+              child: pw.Text(
+                '${f['label']}: ${(f['contribution'] as num) >= 0 ? '+' : ''}${(f['contribution'] as num).toStringAsFixed(4)} score units.',
+              ),
+            ),
+          ),
+          pw.Text(
+            'Exact four-feature Shapley explanation with eight training reference records. Baseline score: ${(data['explanation']['baseline'] as num).toStringAsFixed(4)}. Effects explain model behavior, not medical causation.',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.Header(level: 1, text: 'Measured comparison'),
+          pw.TableHelper.fromTextArray(
+            headers: ['Model', 'Accuracy', 'Sensitivity', 'Specificity'],
+            data: result.comparison
+                .map(
+                  (m) => [
+                    m['name'],
+                    ...['accuracy', 'sensitivity', 'specificity'].map(
+                      (key) => '${((m[key] as num) * 100).toStringAsFixed(1)}%',
+                    ),
+                  ],
+                )
+                .toList(),
+            cellStyle: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            'Both models use the same four selected inputs and held-out test set (${result.comparison.first['test_rows']} records). No quantum advantage is assumed.',
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.Header(level: 1, text: 'Provenance and limitations'),
+          pw.Text(
+            'Model version: ${data['model_version']}',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.Text(
+            '${source['citation']}; ${source['license']}',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.Text(
+            source['source_url'] as String,
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+          pw.Text(
+            'Dataset SHA-256: ${dataset['sha256']}',
+            style: const pw.TextStyle(fontSize: 8),
+          ),
+          pw.SizedBox(height: 8),
+          pw.Text(
+            data['context'] as String,
+            style: const pw.TextStyle(fontSize: 10),
+          ),
+          pw.Text(
+            'Research prototype only. Not a medical diagnosis. Do not use for medical decisions.',
+            style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 10),
           ),
         ],
+        footer: (context) => pw.Align(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(
+            'Page ${context.pageNumber} / ${context.pagesCount}',
+            style: const pw.TextStyle(fontSize: 9),
+          ),
+        ),
       ),
     );
+    return document.save();
   }
 
-  static pw.Widget _buildPatientInfo(PatientInput input) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('Patient Demographics & Metrics', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(10),
-          decoration: pw.BoxDecoration(
-             color: PdfColors.grey100,
-             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-             border: pw.Border.all(color: PdfColors.grey300),
-          ),
-          child: pw.Column(
-            children: [
-               _buildInfoRow('Patient Name:', input.name, 'Age:', '${input.age} yrs'),
-               pw.SizedBox(height: 12),
-               _buildInfoRow('Gender:', input.gender.toUpperCase(), 'BMI:', '${input.bmi} kg/m2'),
-               pw.SizedBox(height: 12),
-               _buildInfoRow('Blood Pressure:', '${input.bloodPressure} mmHg', 'Heart Rate:', '${input.heartRate} bpm'),
-               pw.SizedBox(height: 12),
-               _buildInfoRow('Cholesterol:', '${input.cholesterol} mg/dL', 'Glucose:', '${input.glucose} mg/dL'),
-               pw.SizedBox(height: 12),
-               pw.Row(children: [pw.Text('Smoker: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.Text(input.smoking ? 'Yes' : 'No')]),
-            ]
-          )
-        )
-      ],
-    );
-  }
-  
-  static pw.Widget _buildInfoRow(String label1, String val1, String label2, String val2) {
-    return pw.Row(
-      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-      children: [
-         pw.Expanded(child: pw.Row(children: [pw.Text(label1, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.SizedBox(width: 5), pw.Text(val1)])),
-         pw.Expanded(child: pw.Row(children: [pw.Text(label2, style: pw.TextStyle(fontWeight: pw.FontWeight.bold)), pw.SizedBox(width: 5), pw.Text(val2)])),
-      ]
-    );
-  }
-
-  static pw.Widget _buildRiskScore(PredictionResult result) {
-    final scoreStr = (result.riskScore * 100).toStringAsFixed(1);
-    PdfColor badgeColor;
-    if (result.prediction.toLowerCase().contains('high')) {
-      badgeColor = PdfColors.red700;
-    } else if (result.prediction.toLowerCase().contains('medium')) {
-      badgeColor = PdfColors.orange700;
-    } else {
-      badgeColor = PdfColors.green700;
-    }
-
-    // use lighter shade
-    PdfColor bgColor;
-    if (result.prediction.toLowerCase().contains('high')) {
-      bgColor = PdfColors.red50;
-    } else if (result.prediction.toLowerCase().contains('medium')) {
-      bgColor = PdfColors.orange50;
-    } else {
-      bgColor = PdfColors.green50;
-    }
-
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('Risk Assessment', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-        pw.SizedBox(height: 10),
-        pw.Container(
-          padding: const pw.EdgeInsets.all(15),
-          decoration: pw.BoxDecoration(
-             color: bgColor,
-             borderRadius: const pw.BorderRadius.all(pw.Radius.circular(8)),
-             border: pw.Border.all(color: badgeColor),
-          ),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-               pw.Column(
-                 crossAxisAlignment: pw.CrossAxisAlignment.start,
-                 children: [
-                   pw.Text('Overall Risk Class:', style: const pw.TextStyle(fontSize: 14)),
-                   pw.Text(result.prediction.toUpperCase(), style: pw.TextStyle(fontSize: 20, fontWeight: pw.FontWeight.bold, color: badgeColor)),
-                 ]
-               ),
-               pw.Column(
-                 crossAxisAlignment: pw.CrossAxisAlignment.end,
-                 children: [
-                   pw.Text('Risk Score:', style: const pw.TextStyle(fontSize: 14)),
-                   pw.Text('$scoreStr%', style: pw.TextStyle(fontSize: 24, fontWeight: pw.FontWeight.bold, color: badgeColor)),
-                 ]
-               )
-            ]
-          )
-        )
-      ],
-    );
-  }
-
-  static pw.Widget _buildContributingFactors(PredictionResult result) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('Top Contributing Factors', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-        pw.SizedBox(height: 10),
-        ...result.sortedExplanation.map((entry) {
-          return pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 4),
-            child: pw.Row(
-              children: [
-                pw.Container(
-                  width: 6,
-                  height: 6,
-                  decoration: const pw.BoxDecoration(color: PdfColors.blue800, shape: pw.BoxShape.circle),
-                ),
-                pw.SizedBox(width: 10),
-                pw.Text('${entry.key}: ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                pw.Text(entry.value),
-              ]
-            )
-          );
-        }).toList()
-      ],
-    );
-  }
-
-  static pw.Widget _buildRecommendations(List<String> recs) {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.start,
-      children: [
-        pw.Text('Actionable Recommendations', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold, color: PdfColors.blue800)),
-        pw.SizedBox(height: 10),
-        ...recs.map((rec) {
-          return pw.Container(
-            padding: const pw.EdgeInsets.symmetric(vertical: 4),
-            child: pw.Row(
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text('• ', style: pw.TextStyle(fontWeight: pw.FontWeight.bold, fontSize: 16)),
-                pw.Expanded(child: pw.Text(rec, style: const pw.TextStyle(lineSpacing: 1.5))),
-              ]
-            )
-          );
-        }).toList()
-      ],
-    );
-  }
-
-  static pw.Widget _buildFooter() {
-    return pw.Column(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
-      children: [
-        pw.Divider(color: PdfColors.grey400),
-        pw.SizedBox(height: 10),
-        pw.Text(
-          'Disclaimer: This report is generated by an AI model for educational and informational purposes only '
-          'and is NOT a substitute for professional medical advice, diagnosis, or treatment.',
-          textAlign: pw.TextAlign.center,
-          style: const pw.TextStyle(color: PdfColors.grey600, fontSize: 10),
-        ),
-      ]
+  static Future<void> download(PredictionResult result) async {
+    await Printing.sharePdf(
+      bytes: await buildPdf(result),
+      filename: 'heart-assessment.pdf',
     );
   }
 }

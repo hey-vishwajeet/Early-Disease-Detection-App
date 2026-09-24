@@ -1,23 +1,15 @@
-# render.yaml — Render Blueprint for one-click deployment
-# Docs: https://render.com/docs/blueprint-spec
-
+# Optional hosting; local demonstration needs no database or worker.
+# Build trains the two small benchmark models. Review host capacity before deployment.
 services:
   - type: web
-    name: disease-risk-api
+    name: heart-qml-prototype
     runtime: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 2
+    buildCommand: pip install -r requirements.txt && python train_model.py
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT --workers 1 --timeout 60
+    healthCheckPath: /health
     envVars:
-      - key: DATABASE_URL
-        fromDatabase:
-          name: disease-risk-db
-          property: connectionString
       - key: PYTHON_VERSION
-        value: "3.11.6"
-
-databases:
-  - name: disease-risk-db
-    plan: free
-    databaseName: disease_risk
-    user: disease_risk_user
+        value: "3.12.14"
+      - key: CORS_ORIGINS
+        sync: false

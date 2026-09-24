@@ -1,0 +1,10 @@
+{
+  "source_url": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+  "citation": "Janosi et al. (1989), doi:10.24432/C52P4X",
+  "license": "CC BY 4.0",
+  "download_url": "https://archive.ics.uci.edu/static/public/45/heart%2Bdisease.zip",
+  "download_sha256": "b17cd273da9ce1caa4710fce80227ea454d4dbf9fcbc8e6a9121672751563adc",
+  "source_file": "processed.cleveland.data",
+  "source_sha256": "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8",
+  "normalized_sha256": "ac4aa4036a11acbf5612b1d317770be20f57fb41db4791de7bfac3c7abe0f313"
+}

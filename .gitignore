@@ -49,8 +49,13 @@ app.*.map.json
 __pycache__/
 *.py[cod]
 .venv/
+.venv312/
 .env
 backend/.env
+backend/artifacts/
+backend/test-artifacts/
+.pytest_cache/
+synthetic_fixture/
 
 # Analysis logs
 analyze*.txt

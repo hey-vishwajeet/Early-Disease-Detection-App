@@ -1,0 +1,198 @@
+{
+  "prediction": "Disease absent",
+  "score": -0.5250539638569386,
+  "threshold": 0.12459992067693072,
+  "score_type": "Uncalibrated model score",
+  "probability": null,
+  "summary": "The quantum model classified this record as \"disease absent\" using patterns learned from the UCI heart-disease benchmark. This is a research result, not a medical diagnosis.",
+  "top_features": [
+    {
+      "name": "oldpeak",
+      "label": "ST depression during exercise",
+      "unit": "recorded ST value",
+      "help": "Exercise-induced ST depression relative to rest. Copy the ECG test value.",
+      "choices": null,
+      "input_value": 0.0,
+      "contribution": -0.5772715738317414
+    },
+    {
+      "name": "thalach",
+      "label": "Maximum exercise heart rate",
+      "unit": "bpm",
+      "help": "Highest heart rate reached during an exercise test, not resting heart rate.",
+      "choices": null,
+      "input_value": 182.0,
+      "contribution": -0.26463730367410154
+    },
+    {
+      "name": "trestbps",
+      "label": "Resting blood pressure",
+      "unit": "mmHg",
+      "help": "Resting systolic blood pressure recorded on hospital admission.",
+      "choices": null,
+      "input_value": 138.0,
+      "contribution": 0.2526333326556286
+    }
+  ],
+  "all_contributions": [
+    {
+      "name": "oldpeak",
+      "label": "ST depression during exercise",
+      "unit": "recorded ST value",
+      "help": "Exercise-induced ST depression relative to rest. Copy the ECG test value.",
+      "choices": null,
+      "input_value": 0.0,
+      "contribution": -0.5772715738317414
+    },
+    {
+      "name": "thalach",
+      "label": "Maximum exercise heart rate",
+      "unit": "bpm",
+      "help": "Highest heart rate reached during an exercise test, not resting heart rate.",
+      "choices": null,
+      "input_value": 182.0,
+      "contribution": -0.26463730367410154
+    },
+    {
+      "name": "trestbps",
+      "label": "Resting blood pressure",
+      "unit": "mmHg",
+      "help": "Resting systolic blood pressure recorded on hospital admission.",
+      "choices": null,
+      "input_value": 138.0,
+      "contribution": 0.2526333326556286
+    },
+    {
+      "name": "age",
+      "label": "Age",
+      "unit": "years",
+      "help": "Age at the time of the recorded examination.",
+      "choices": null,
+      "input_value": 59.0,
+      "contribution": 0.054677954298501086
+    }
+  ],
+  "explanation": {
+    "method": "Exact four-feature interventional Shapley",
+    "baseline": 0.009543626694778672,
+    "output_scale": "decision margin",
+    "evaluations": 128,
+    "background_rows": 8
+  },
+  "input": {
+    "age": 59.0,
+    "trestbps": 138.0,
+    "thalach": 182.0,
+    "oldpeak": 0.0
+  },
+  "imputed_fields": [],
+  "model_version": "65443c2b8168428eb5b3605541f2c48a",
+  "comparison": [
+    {
+      "id": "classical",
+      "name": "Classical SVM",
+      "accuracy": 0.8852459016393442,
+      "sensitivity": 0.8571428571428571,
+      "specificity": 0.9090909090909091,
+      "confusion_matrix": [
+        [
+          30,
+          3
+        ],
+        [
+          4,
+          24
+        ]
+      ],
+      "test_rows": 61,
+      "threshold": 0.3777274415625285,
+      "fit_seconds": 0.008111499999358784,
+      "test_inference_seconds": 0.0034512999991420656
+    },
+    {
+      "id": "quantum",
+      "name": "Quantum-kernel SVM",
+      "accuracy": 0.7868852459016393,
+      "sensitivity": 0.7142857142857143,
+      "specificity": 0.8484848484848485,
+      "confusion_matrix": [
+        [
+          28,
+          5
+        ],
+        [
+          8,
+          20
+        ]
+      ],
+      "test_rows": 61,
+      "threshold": 0.12459992067693072,
+      "fit_seconds": 0.35711170000013226,
+      "test_inference_seconds": 0.080213599999297
+    }
+  ],
+  "dataset": {
+    "rows": 303,
+    "sha256": "ac4aa4036a11acbf5612b1d317770be20f57fb41db4791de7bfac3c7abe0f313",
+    "quality": {
+      "missing": {
+        "age": 0,
+        "sex": 0,
+        "cp": 0,
+        "trestbps": 0,
+        "chol": 0,
+        "fbs": 0,
+        "restecg": 0,
+        "thalach": 0,
+        "exang": 0,
+        "oldpeak": 0,
+        "slope": 0,
+        "ca": 4,
+        "thal": 2
+      }
+    },
+    "target_definition": "UCI num=0: absence; num=1,2,3,4: presence of angiographic heart disease.",
+    "source": {
+      "source_url": "https://archive.ics.uci.edu/dataset/45/heart+disease",
+      "citation": "Janosi et al. (1989), doi:10.24432/C52P4X",
+      "license": "CC BY 4.0",
+      "download_url": "https://archive.ics.uci.edu/static/public/45/heart%2Bdisease.zip",
+      "download_sha256": "b17cd273da9ce1caa4710fce80227ea454d4dbf9fcbc8e6a9121672751563adc",
+      "source_file": "processed.cleveland.data",
+      "source_sha256": "a74b7efa387bc9d108d7d0115d831fe9b414b29ae7124f331b622b4efa0427c8",
+      "normalized_sha256": "ac4aa4036a11acbf5612b1d317770be20f57fb41db4791de7bfac3c7abe0f313"
+    }
+  },
+  "features": [
+    {
+      "name": "age",
+      "label": "Age",
+      "unit": "years",
+      "help": "Age at the time of the recorded examination.",
+      "choices": null
+    },
+    {
+      "name": "trestbps",
+      "label": "Resting blood pressure",
+      "unit": "mmHg",
+      "help": "Resting systolic blood pressure recorded on hospital admission.",
+      "choices": null
+    },
+    {
+      "name": "thalach",
+      "label": "Maximum exercise heart rate",
+      "unit": "bpm",
+      "help": "Highest heart rate reached during an exercise test, not resting heart rate.",
+      "choices": null
+    },
+    {
+      "name": "oldpeak",
+      "label": "ST depression during exercise",
+      "unit": "recorded ST value",
+      "help": "Exercise-induced ST depression relative to rest. Copy the ECG test value.",
+      "choices": null
+    }
+  ],
+  "sample_partition": "User input; Load Sample uses a held-out test record",
+  "context": "Diagnostic benchmark classification does not prove early detection or predict future disease. Quantum improvement is not assumed."
+}
