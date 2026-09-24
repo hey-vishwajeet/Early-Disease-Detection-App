@@ -39,7 +39,7 @@ class ApiService {
       rethrow;
     } catch (_) {
       throw ApiException(
-        'Cannot reach the local server. Check that the Flask backend is running, then try again.',
+        'Cannot reach the assessment server. Please try again in a moment.',
       );
     }
   }
