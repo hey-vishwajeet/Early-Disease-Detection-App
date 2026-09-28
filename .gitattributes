@@ -1,0 +1,2 @@
+# Keep the benchmark bytes stable on Windows and Linux.
+backend/benchmarks/*.csv text eol=lf

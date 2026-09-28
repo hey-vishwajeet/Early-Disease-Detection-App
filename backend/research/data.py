@@ -55,7 +55,8 @@ def parse_csv(raw, task_id='heart'):
 
 
 def load_heart():
-    raw = (DATA_DIR / 'heart.csv').read_bytes()
+    # Canonical LF bytes make the checksum independent of checkout line endings.
+    raw = (DATA_DIR / 'heart.csv').read_bytes().replace(b'\r\n', b'\n')
     manifest = json.loads((DATA_DIR / 'heart.manifest.json').read_text(encoding='utf-8'))
     if hashlib.sha256(raw).hexdigest() != manifest['normalized_sha256']:
         raise ValueError('Benchmark checksum mismatch. Run python backend/fetch_heart.py again.')

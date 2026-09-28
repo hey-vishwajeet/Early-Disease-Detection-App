@@ -17,7 +17,7 @@ def main():
     with ZipFile(io.BytesIO(raw)) as archive:
         source = archive.read('processed.cleveland.data')
     frame = pd.read_csv(io.BytesIO(source), header=None, names=[f['name'] for f in HEART] + ['num'])
-    normalized = frame.to_csv(index=False).encode()
+    normalized = frame.to_csv(index=False, lineterminator='\n').encode('utf-8')
     parse_csv(normalized, 'heart')
     directory = Path(__file__).resolve().parent / 'benchmarks'
     directory.mkdir(exist_ok=True)
