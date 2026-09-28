@@ -41,6 +41,26 @@ Training reads the included, checksummed public Cleveland CSV. If absent, the sc
 
 For Android emulators set `API_BASE_URL=http://10.0.2.2:5000`; release deployments should use HTTPS. Browser requests use the exact allowed origin `http://localhost:8080`. Override `CORS_ORIGINS` if you use another origin. The API binds to localhost by default.
 
+## GitHub Pages frontend and Render backend
+
+The `.github/workflows/deploy-web.yml` workflow builds and deploys Flutter on pushes to `main`.
+In GitHub repository **Settings > Pages**, select **GitHub Actions** as the source.
+The frontend address is https://hey-vishwajeet.github.io/Early-Disease-Detection-App/.
+The build uses the repository base path and connects to
+https://setting-value-name-heart-qml-prototype.onrender.com.
+
+In the Render service's **Environment** settings, set `CORS_ORIGINS` to
+`https://hey-vishwajeet.github.io,http://localhost:8080` and save/redeploy.
+Origins have no repository path or trailing slash. Keep localhost if you also demonstrate locally.
+After both deployments finish, verify **Start Assessment > Load Sample > Analyze > Download PDF**.
+On Render Free, open `/api/config` before presenting to allow a sleeping backend to wake up.
+
+To reproduce the Pages build locally:
+
+```powershell
+flutter build web --release --no-web-resources-cdn --base-href /Early-Disease-Detection-App/ --dart-define=API_BASE_URL=https://setting-value-name-heart-qml-prototype.onrender.com
+```
+
 ## The three-screen demonstration
 
 1. **Home:** short introduction and **Start Assessment**.
@@ -148,4 +168,4 @@ The PDF regression test generates `build/test-reports/heart-assessment.pdf` from
 - Exact, noiseless CPU simulation only; no QPU execution, speedup or quantum advantage claim.
 - Only four continuous features; useful for a student demonstration, not a replacement for a complete clinical assessment.
 - No patient identity, user accounts, database requirement or production security layer. Public benchmark demonstration only.
-- Render configuration is optional and has not been deployed. Native mobile/macOS builds have not been verified.
+- The Render backend was deployed and its sample prediction, explanation and CSV flow verified on 28 September 2026. Native mobile/macOS builds have not been verified.
